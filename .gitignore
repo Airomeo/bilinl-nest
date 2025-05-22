@@ -54,3 +54,18 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Prisma generated files
+/generated/prisma/
+
+# Redis
+*.rdb
+*.aof
+*.aof.manifest
+*.rdb-shm
+*.rdb-wal
+
+# SQLite
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal

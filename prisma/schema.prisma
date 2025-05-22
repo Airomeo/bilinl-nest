@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model customer {
+  ke_hu_ming_cheng String? @map("客户名称")
+  suo_shu_qi_wei_hao String? @map("所属企微号")
+  suo_shu_qi_ye String? @map("所属企业")
+  tian_jia_shi_jian String? @map("添加时间")
+  biao_qian String? @map("标签")
+  ke_hu_xi_tong_bei_zhu String? @map("客户系统备注")
+  ke_hu_bei_zhu_ming String? @map("客户备注名")
+  miao_shu_xin_xi String? @map("描述信息")
+  qi_wei_shou_ji_hao String? @map("企微手机号")
+  xi_tong_shou_ji String? @map("系统手机")
+  freWxId String @map("客户编号")
+  wxId String @map("企微编号")
+  fu_gai_ci_shu Int? @default(0) @map("覆盖次数")
+  kai_kou_zhuang_tai Boolean? @default(false) @map("开口状态")
+
+  @@id([wxId, freWxId])
+  @@index([wxId, freWxId], map: "customer_企微编号_客户编号_index")
+}
+
+model User {
+  id    Int     @default(autoincrement()) @id
+  email String  @unique
+  name  String?
+  posts Post[]
+}
+
+model Post {
+  id        Int      @default(autoincrement()) @id
+  title     String
+  content   String?
+  published Boolean? @default(false)
+  author    User?    @relation(fields: [authorId], references: [id])
+  authorId  Int?
+}
