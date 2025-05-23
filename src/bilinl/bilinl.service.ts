@@ -1029,7 +1029,7 @@ export class BilinlService implements OnApplicationBootstrap {
     if (response.data.code === 0) {
       return response.data;
     } else {
-      throw new Error(JSON.stringify(response)); // 触发重试
+      throw new Error(JSON.stringify(response.data)); // 触发重试
     }
   }
 
@@ -1078,7 +1078,7 @@ export class BilinlService implements OnApplicationBootstrap {
     if (response.data.code === 0) {
       return response.data;
     } else {
-      throw new Error(JSON.stringify(response)); // 触发重试
+      throw new Error(JSON.stringify(response.data)); // 触发重试
     }
   }
 
