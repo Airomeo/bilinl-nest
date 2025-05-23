@@ -96,10 +96,7 @@ export class TokenService implements OnModuleInit {
           }
 
           this.tokenData = res.data;
-          console.log(this.tokenData);
-          this.logger.log(
-            `[TOKEN] Success. Expires at: ${this.tokenData.expired}`,
-          );
+          this.logger.log(`[TOKEN] ${JSON.stringify(this.tokenData)}`);
 
           this.refreshingPromise = null;
           resolveOuter(); // 成功，解除外部 await

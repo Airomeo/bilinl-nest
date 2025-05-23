@@ -453,7 +453,7 @@ export class BilinlService implements OnApplicationBootstrap {
     //   .catch((error) => {
     //     this.logger.error(`Error creating user: ${error.message}`);
     //   });
-    // setInterval(async () => {
+    // setTimeout(async () => {
     //   try {
     //     const response = await lastValueFrom(
     //       this.httpService.post(
@@ -465,18 +465,17 @@ export class BilinlService implements OnApplicationBootstrap {
     //   } catch (error) {
     //     this.logger.error(error);
     //   }
-    // }, 20000);
+    // }, 3000);
   }
 
   // 入队逻辑
   async enqueueCallback(body: CallbackPayload) {
-    this.logger.log(`[Callback] Received body: ${JSON.stringify(body)}`);
+    this.logger.log(
+      `[${this.enqueueCallback.name}] [${body.type}] ${JSON.stringify(body)}`,
+    );
 
     // 判断是否有 handler，决定是否入队
     if (!this.callbackHandlers[body.type]) {
-      this.logger.warn(
-        `[Callback] No handler registered for callback type ${body.type}`,
-      );
       return;
     }
 
@@ -493,18 +492,12 @@ export class BilinlService implements OnApplicationBootstrap {
   // 处理逻辑入口
   async handleCallback(body: CallbackPayload): Promise<void> {
     const handler = this.callbackHandlers[body.type];
-    if (!handler) {
-      this.logger.warn(
-        `[Callback] No handler registered for callback type ${body.type}`,
-      );
-      return;
-    }
 
     try {
       await handler(body);
     } catch (error) {
       this.logger.error(
-        `[Callback] Handler for type ${body.type} failed: ${error.message}`,
+        `[${this.handleCallback.name}] [${body.type}] Handler failed: ${error.message}`,
         error.stack,
       );
 

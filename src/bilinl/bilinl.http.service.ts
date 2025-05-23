@@ -18,7 +18,6 @@ export class BilinlHttpService implements OnModuleInit {
       // Determine the full URL to check against the target domain
       // If baseURL is set on axiosInstance, config.url might be relative.
       const fullUrl = new URL(config.url || '', config.baseURL).toString();
-      console.log(fullUrl);
 
       if (fullUrl.startsWith(TARGET_DOMAIN_PREFIX)) {
         const token = this.tokenService.getToken();
@@ -34,7 +33,10 @@ export class BilinlHttpService implements OnModuleInit {
         response.config.url || '',
         response.config.baseURL,
       ).toString();
-      console.log(response.data);
+
+      this.logger.log(
+        `[${this.onModuleInit.name}] ${JSON.stringify(response.config)} ${JSON.stringify(response.data)}`,
+      );
 
       if (
         fullUrl.startsWith(TARGET_DOMAIN_PREFIX) &&
@@ -44,12 +46,11 @@ export class BilinlHttpService implements OnModuleInit {
         // {"code":2012,"extra":{"errorMsg":"Not Authenticated"},"message":"认证失败,请重新登录!","path":"/thirdparty/personal/thirdSetEnterFreTag","timestamp":1747294964636}
         // 重新发起请求（只 retry 一次）
         this.logger.warn('Token expired, attempting to refresh...');
-        console.log('old token', this.tokenService.getToken());
         await this.tokenService.fetchToken(); // Refresh the token
         const token = this.tokenService.getToken();
-        console.log('new token', token);
         response.config.headers['authorization'] = `Bearer ${token}`;
 
+        this.logger.log(`Retrying request with new token...`);
         return this.httpService.axiosRef.request(response.config); // retry
       }
       return response;

@@ -16,7 +16,6 @@ export class BilinlProcessor extends WorkerHost {
       if (job.name === 'callback') {
         await this.bilinlService.handleCallback(job.data);
       } else if (job.name === '覆盖次数计划任务') {
-        // await this.bilinlService.handleCallback2(job.data);
         await this.bilinlService.覆盖次数计划任务(job.data);
       } else {
         this.logger.warn(`Unknown job name: ${job.name}`);
