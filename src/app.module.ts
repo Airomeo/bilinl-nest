@@ -7,7 +7,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BilinlModule } from './bilinl/bilinl.module';
 import { ExampleModule } from './example/example.module';
-import { TokenModule } from './token/token.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -24,7 +23,6 @@ import { PrismaModule } from './prisma/prisma.module';
     }),
     HttpModule,
     ExampleModule,
-    TokenModule,
     BilinlModule,
     PrismaModule,
   ],

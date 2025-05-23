@@ -453,6 +453,19 @@ export class BilinlService implements OnApplicationBootstrap {
     //   .catch((error) => {
     //     this.logger.error(`Error creating user: ${error.message}`);
     //   });
+    // setInterval(async () => {
+    //   try {
+    //     const response = await lastValueFrom(
+    //       this.httpService.post(
+    //         'https://gateway.bilinl.com/thirdparty/commonBusi/listMerchantSubAccount',
+    //         {},
+    //       ),
+    //     );
+    //     this.logger.log(response.data);
+    //   } catch (error) {
+    //     this.logger.error(error);
+    //   }
+    // }, 20000);
   }
 
   // 入队逻辑
@@ -566,36 +579,38 @@ export class BilinlService implements OnApplicationBootstrap {
       });
 
       // 删标签
-      await this.thirdSetEnterFreTagWithThrottleAndRetry(
-        {
-          addTags: [],
-          delTags: [
-            '1910363962853605376', // 上月加V
-            '1910363962853605376', // 过往加V
-            '1911417568575152129', // 已开口
-            ...targetEnterpriseTags.map((tag) => tag.tagId),
-          ],
-          freWxId: freWxId,
-          merchatId: '',
-          wxId: wxId,
-        },
-        this.thirdSetEnterFreTagCallTimestamps,
+      await this.WithThrottleAndRetry(
+        () =>
+          this.thirdSetEnterFreTag({
+            addTags: [],
+            delTags: [
+              '1910363962853605376', // 上月加V
+              '1910363962853605376', // 过往加V
+              '1911417568575152129', // 已开口
+              ...targetEnterpriseTags.map((tag) => tag.tagId),
+            ],
+            freWxId: freWxId,
+            merchatId: '',
+            wxId: wxId,
+          }),
+        `${this.thirdSetEnterFreTag.name} ${freWxId} ${wxId}`,
       );
 
       // 打标签
-      await this.thirdSetEnterFreTagWithThrottleAndRetry(
-        {
-          addTags: [
-            '1910363962891354112', // 当月加V
-            '1911417568575152128', // 未开口
-            '1911426519739711488', // 销售主动覆盖0次
-          ],
-          delTags: [],
-          freWxId,
-          merchatId: '',
-          wxId,
-        },
-        this.thirdSetEnterFreTagCallTimestamps,
+      await this.WithThrottleAndRetry(
+        () =>
+          this.thirdSetEnterFreTag({
+            addTags: [
+              '1910363962891354112', // 当月加V
+              '1911417568575152128', // 未开口
+              '1911426519739711488', // 销售主动覆盖0次
+            ],
+            delTags: [],
+            freWxId,
+            merchatId: '',
+            wxId,
+          }),
+        `${this.thirdSetEnterFreTag.name} ${freWxId} ${wxId}`,
       );
 
       // 添加下一次计划任务
@@ -725,27 +740,29 @@ export class BilinlService implements OnApplicationBootstrap {
       }
 
       // 删标签
-      await this.thirdSetEnterFreTagWithThrottleAndRetry(
-        {
-          addTags: [],
-          delTags: ['1911417568575152128'], // 未开口
-          merchatId: '',
-          freWxId: senderWxId,
-          wxId: receiverWxId,
-        },
-        this.thirdSetEnterFreTagCallTimestamps,
+      await this.WithThrottleAndRetry(
+        () =>
+          this.thirdSetEnterFreTag({
+            addTags: [],
+            delTags: ['1911417568575152128'], // 未开口
+            merchatId: '',
+            freWxId: senderWxId,
+            wxId: receiverWxId,
+          }),
+        `${this.thirdSetEnterFreTag.name} ${senderWxId} ${receiverWxId}`,
       );
 
       // 打标签
-      await this.thirdSetEnterFreTagWithThrottleAndRetry(
-        {
-          addTags: ['1911417568575152129'], // 已开口
-          delTags: [],
-          merchatId: '',
-          freWxId: senderWxId,
-          wxId: receiverWxId,
-        },
-        this.thirdSetEnterFreTagCallTimestamps,
+      await this.WithThrottleAndRetry(
+        () =>
+          this.thirdSetEnterFreTag({
+            addTags: ['1911417568575152129'], // 已开口
+            delTags: [],
+            merchatId: '',
+            freWxId: senderWxId,
+            wxId: receiverWxId,
+          }),
+        `${this.thirdSetEnterFreTag.name} ${senderWxId} ${receiverWxId}`,
       );
 
       // 保存已开口状态
@@ -786,7 +803,7 @@ export class BilinlService implements OnApplicationBootstrap {
     wxId: string;
     configTemplate: any;
   }) {
-    this.logger.log('覆盖次数计划任务', data);
+    this.logger.log(this.覆盖次数计划任务.name, data);
     const { freWxId, wxId } = data;
     const customer = await this.prisma.customer.findUnique({
       where: {
@@ -808,31 +825,33 @@ export class BilinlService implements OnApplicationBootstrap {
     // 已开口，删标签（未开口），打标签（已开口）
     if (customer?.kai_kou_zhuang_tai) {
       // 删标签
-      await this.thirdSetEnterFreTagWithThrottleAndRetry(
-        {
-          addTags: [],
-          delTags: [
-            '1911417568575152128', // 未开口
-          ],
-          freWxId: freWxId,
-          merchatId: '',
-          wxId: wxId,
-        },
-        this.thirdSetEnterFreTagCallTimestamps,
+      await this.WithThrottleAndRetry(
+        () =>
+          this.thirdSetEnterFreTag({
+            addTags: [],
+            delTags: [
+              '1911417568575152128', // 未开口
+            ],
+            freWxId: freWxId,
+            merchatId: '',
+            wxId: wxId,
+          }),
+        `${this.thirdSetEnterFreTag.name} ${freWxId} ${wxId}`,
       );
 
       // 打标签
-      await this.thirdSetEnterFreTagWithThrottleAndRetry(
-        {
-          addTags: [
-            '1911417568575152129', // 已开口
-          ],
-          delTags: [],
-          freWxId: freWxId,
-          merchatId: '',
-          wxId: wxId,
-        },
-        this.thirdSetEnterFreTagCallTimestamps,
+      await this.WithThrottleAndRetry(
+        () =>
+          this.thirdSetEnterFreTag({
+            addTags: [
+              '1911417568575152129', // 已开口
+            ],
+            delTags: [],
+            freWxId: freWxId,
+            merchatId: '',
+            wxId: wxId,
+          }),
+        `${this.thirdSetEnterFreTag.name} ${freWxId} ${wxId}`,
       );
       return;
     }
@@ -860,15 +879,16 @@ export class BilinlService implements OnApplicationBootstrap {
     // 删标签
     if (data.configTemplate.deleteTags.length > 0) {
       promiseTasks.push(
-        this.thirdSetEnterFreTagWithThrottleAndRetry(
-          {
-            addTags: [],
-            delTags: data.configTemplate.deleteTags.map((it) => it.tagId),
-            freWxId: freWxId,
-            merchatId: '',
-            wxId: wxId,
-          },
-          this.thirdSetEnterFreTagCallTimestamps,
+        this.WithThrottleAndRetry(
+          () =>
+            this.thirdSetEnterFreTag({
+              addTags: [],
+              delTags: data.configTemplate.deleteTags.map((it) => it.tagId),
+              freWxId: freWxId,
+              merchatId: '',
+              wxId: wxId,
+            }),
+          `${this.thirdSetEnterFreTag.name} ${freWxId} ${wxId}`,
         ),
       );
     }
@@ -876,15 +896,16 @@ export class BilinlService implements OnApplicationBootstrap {
     // 打标签
     if (data.configTemplate.addTags.length > 0) {
       promiseTasks.push(
-        this.thirdSetEnterFreTagWithThrottleAndRetry(
-          {
-            addTags: data.configTemplate.addTags.map((it) => it.tagId),
-            delTags: [],
-            freWxId: freWxId,
-            merchatId: '',
-            wxId: wxId,
-          },
-          this.thirdSetEnterFreTagCallTimestamps,
+        this.WithThrottleAndRetry(
+          () =>
+            this.thirdSetEnterFreTag({
+              addTags: data.configTemplate.addTags.map((it) => it.tagId),
+              delTags: [],
+              freWxId: freWxId,
+              merchatId: '',
+              wxId: wxId,
+            }),
+          `${this.thirdSetEnterFreTag.name} ${freWxId} ${wxId}`,
         ),
       );
     }
@@ -892,14 +913,15 @@ export class BilinlService implements OnApplicationBootstrap {
     // 发消息
     if (data.configTemplate.message) {
       promiseTasks.push(
-        this.privateMessageWithThrottleAndRetry(
-          {
-            msgContent: data.configTemplate.message,
-            merchatId: '',
-            freWxId,
-            wxId,
-          },
-          this.privateMessageCallTimestamps,
+        this.WithThrottleAndRetry(
+          () =>
+            this.privateMessage({
+              msgContent: data.configTemplate.message,
+              merchatId: '',
+              freWxId,
+              wxId,
+            }),
+          `${this.privateMessage.name} ${freWxId} ${wxId}`,
         ),
       );
     }
@@ -1002,9 +1024,13 @@ export class BilinlService implements OnApplicationBootstrap {
         params,
       ),
     );
-    return response.data;
     // {"code":10000,"data":null,"extra":null,"message":"同一个号的好友，5秒内只能打1个标签","path":"","timestamp":1747048647603}
     // {"code":0,"data":[{"failTagIds":[],"failureReason":"","freWxId":"","optSerNo":"","successTagIds":[],"wxId":""}],"extra":null,"message":"success","path":"","timestamp":1746979433209}
+    if (response.data.code === 0) {
+      return response.data;
+    } else {
+      throw new Error(JSON.stringify(response)); // 触发重试
+    }
   }
 
   // 发消息
@@ -1048,139 +1074,60 @@ export class BilinlService implements OnApplicationBootstrap {
         },
       ),
     );
-    return response.data;
-    // {"code":10000,"data":null,"extra":null,"message":"同一个号的好友，5秒内只能打1个标签","path":"","timestamp":1747048647603}
-    // {"code":0,"data":[{"failTagIds":[],"failureReason":"","freWxId":"","optSerNo":"","successTagIds":[],"wxId":""}],"extra":null,"message":"success","path":"","timestamp":1746979433209}
+    // {"code":0,"data":{"data":null,"optSerNo":"20250520162405343127726063341","resultCode":0,"resultMsg":"success"},"extra":null,"message":"success","path":"","timestamp":1747729445388}
+    if (response.data.code === 0) {
+      return response.data;
+    } else {
+      throw new Error(JSON.stringify(response)); // 触发重试
+    }
   }
 
-  private thirdSetEnterFreTagCallTimestamps: Record<string, number> = {};
+  // TODO: 自动清理超过一定时间的调用记录
+  private callTimestamps: Record<string, number> = {};
 
-  /**
-   * 【企微】设置企微好友标签
-   * 平台规则限制：同一个号的好友，5秒内只能打1个标签
-   * 节流控制：如果连续两次调用该函数“间隔小于5秒”且“wxId相同”，则自动推迟到5秒后再调用
-   * 重试机制：如果返回code不为0或出现异常，则立即重试。最大重试次数为3次
-   * @param { object } params - 请求参数
-   * @param {string[]} params.addTags - Tags to add.
-   * @param {string[]} params.delTags - Tags to delete.
-   * @param {string} params.freWxId - Friend's WxId.
-   * @param {string} params.merchatId - Merchant's Id.
-   * @param {string} params.wxId - WxId of the account performing the tagging.
-   * @returns {Promise<*>} A promise that resolves with the API response or the last error encountered.
-   */
-  async thirdSetEnterFreTagWithThrottleAndRetry(
-    params: {
-      addTags: string[];
-      delTags: string[];
-      freWxId: string;
-      merchatId: string;
-      wxId: string;
-    },
-    callTimestamps: Record<string, number> = {},
-    maxRetries: number = 3,
-    minInterval: number = 5000 + 1000, // 实测5秒经常会失败，增加1秒的冗余
-  ): Promise<any> {
-    const { wxId } = params;
-    const lastCallTime = callTimestamps[wxId] || 0;
-    const timeSinceLastCall = Date.now() - lastCallTime;
-
-    if (timeSinceLastCall < minInterval) {
-      const delay = minInterval - timeSinceLastCall;
-      this.logger.log(`等待 ${delay}ms 后调用 wxId=${wxId}`);
-      // TODO: 改为bullmq的延迟队列
-      await new Promise((resolve) => setTimeout(resolve, delay)); // sleep
-    }
-
-    callTimestamps[wxId] = Date.now(); // 更新调用时间
-
-    let attempt = 0;
-
-    while (attempt < maxRetries) {
-      try {
-        const data = await this.thirdSetEnterFreTag(params);
-        this.logger.log(
-          `${Date.now()} 尝试第 ${attempt + 1} 次，参数：${JSON.stringify(
-            params,
-          )}，响应：${JSON.stringify(data)}`,
-        );
-
-        if (data.code === 0) {
-          return data;
-        } else {
-          throw new Error(data); // 触发重试
-        }
-      } catch (error) {
-        this.logger.error(
-          `第 ${attempt + 1} 次请求失败，重试中... 参数：${JSON.stringify(
-            params,
-          )}.`,
-          error,
-        );
-      }
-
-      attempt++;
-    }
-
-    throw new Error(
-      `请求失败，已重试 ${maxRetries} 次 参数：${JSON.stringify(params)}.`,
-    );
-  }
-
-  private privateMessageCallTimestamps: Record<string, number> = {};
-
-  async privateMessageWithThrottleAndRetry(
-    params: {
-      msgContent: string;
-      freWxId: string;
-      merchatId: string;
-      wxId: string;
-    },
-    callTimestamps: Record<string, number> = {},
+  async WithThrottleAndRetry<T>(
+    callback: () => T | Promise<T>,
+    jobId: string,
     maxRetries: number = 3,
     minInterval: number = 15 * 1000,
-  ): Promise<any> {
-    const { wxId } = params;
-    const lastCallTime = callTimestamps[wxId] || 0;
+  ): Promise<T> {
+    const lastCallTime = this.callTimestamps[jobId] || 0;
     const timeSinceLastCall = Date.now() - lastCallTime;
 
     if (timeSinceLastCall < minInterval) {
       const delay = minInterval - timeSinceLastCall;
-      this.logger.log(`等待 ${delay}ms 后调用 wxId=${wxId}`);
+      this.logger.log(`[ThrottleAndRetry] [${jobId}] delay ${delay}ms.`);
+      // TODO: 改为bullmq的延迟队列
       await new Promise((resolve) => setTimeout(resolve, delay)); // sleep
+      this.logger.log(`[ThrottleAndRetry] [${jobId}] after ${delay}ms.`);
     }
 
-    callTimestamps[wxId] = Date.now(); // 更新调用时间
-
-    let attempt = 0;
-
-    while (attempt < maxRetries) {
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
-        const data = await this.privateMessage(params);
+        // 更新调用时间
+        this.callTimestamps[jobId] = Date.now();
+
         this.logger.log(
-          `${Date.now()} 尝试第 ${attempt + 1} 次，参数：${JSON.stringify(
-            params,
-          )}，响应：${JSON.stringify(data)}`,
+          `[ThrottleAndRetry] [${jobId}] 尝试第 ${attempt + 1} 次.`,
         );
 
-        if (data.code === 0) {
-          return data;
-        } else {
-          throw new Error(data); // 触发重试
-        }
+        const data = await callback(); // Works for both sync and async functions
+
+        this.logger.log(
+          `[ThrottleAndRetry] [${jobId}] 尝试第 ${attempt + 1} 次，响应：${JSON.stringify(data)}`,
+        );
+
+        return data;
       } catch (error) {
         this.logger.error(
-          `第 ${attempt + 1} 次请求失败，重试中... 参数：${JSON.stringify(
-            params,
-          )}.`,
+          `[ThrottleAndRetry] [${jobId}] 第 ${attempt + 1} 次请求失败，重试中...`,
           error,
         );
       }
-
-      attempt++;
     }
 
     throw new Error(
-      `请求失败，已重试 ${maxRetries} 次 参数：${JSON.stringify(params)}.`,
+      `[ThrottleAndRetry] [${jobId}] 请求失败，已重试 ${maxRetries} 次.`,
     );
   }
 }

@@ -96,6 +96,7 @@ export class TokenService implements OnModuleInit {
           }
 
           this.tokenData = res.data;
+          console.log(this.tokenData);
           this.logger.log(
             `[TOKEN] Success. Expires at: ${this.tokenData.expired}`,
           );
